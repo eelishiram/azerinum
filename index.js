@@ -1,41 +1,45 @@
-const BIR = 'bir';
-const teklik = ['', BIR + ' ', 'iki ', 'uc ', 'dord ', 'besh ', 'alti ', 'yeddi ', 'sekkiz ', 'doqquz '];
-const onluq = ['', 'on ', 'iyirmi ', 'otuz ', 'qirx ', 'elli ', 'altmish ', 'yetmish ', 'seksen ', 'doxsan '];
-const higher = ['', 'min ', 'milyon ', 'milyard ', 'trilyon ', 'kattrilyon ', 'kentrilyon ', 'sekstilyon ', 'septilyon '];
-
-
-function fullConversion(str) {
-    let number = str.split('').reverse().join('');
+var assets = require('./assets');
+function fullConversion(value) {
+    if ((typeof value === "number") && Math.floor(value) === value)
+        value = value.toString();
+    let number = value.split('').join('');
     let word = '';
     let step = 0;
-    while(number.length > 0){
-        let distance = number.length > 3 ? 3 : number.length;
-        let commaSection = number.substring(0, distance);
+    let len = number.length
+    for(var i = 0; i < (3 - len % 3) % 3; ++ i)
+        number = '0' + number;
+    len = number.length
+    let numSections = ~~(len / 3)
+    for(var i = 0; i < numSections; ++ i) {
+        let commaSection = number.substring(i * 3, i * 3 + 3);
+        let stage = numSections - i - 1;
+        let currentSection = commaConversion(commaSection);
 
-        let convertedCommaSection = commaConversion(commaSection);
-        let safeCommaSection = step == 1 && convertedCommaSection.trim() == BIR ? '' : convertedCommaSection;
-        let prefix = convertedCommaSection.trim().length == 0 ? '' : higher[step];
+        if(currentSection == '')
+            continue;
+        
+        if(stage == 1 && currentSection.trim() == assets.BIR) 
+            currentSection = '';
 
-        word = safeCommaSection + prefix + word;
-
-        number = number.substring(distance);
-        step++;
+        word += currentSection + assets.higher[stage];
     }
-    return word.trim();
+    if(word == '')
+        return assets.SIFIR
+    return word;
 }
 
 function commaConversion(section){
     let word = '';
     for (var i = 0; i < section.length; i++) {
         let number = section[i];
-        if (i % 3 == 0) {
-            word = teklik[number] + word;
+        if (i % 3 == 2) {
+            word = word + assets.teklik[number];
         } else if (i % 3 == 1) {
-            word = onluq[number] + word;
+            word = word + assets.onluq[number];
         } else {
-            let tek = (number == 1) ? '' : teklik[number];
-            let suffix = (number == 0) ? '' : 'yuz ';
-            word = tek + suffix + word;
+            let tek = (number == 1) ? '' : assets.teklik[number];
+            let suffix = (number == 0) ? '' : assets.YUZ;
+            word = tek + suffix + word; 
         }
     }
     return word;
